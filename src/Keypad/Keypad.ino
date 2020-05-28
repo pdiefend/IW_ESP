@@ -1,5 +1,6 @@
 
 #include "FS.h"
+#include "Free_Fonts.h" // Include the header file attached to this sketch
 
 #include <SPI.h>
 #include <TFT_eSPI.h>      // Hardware-specific library
@@ -54,7 +55,7 @@ void setup() {
   tft.fillRect(0, 0, TFT_X_SIZE, TFT_Y_SIZE, TFT_DARKGREY);
 
   // Draw keypad
-  //drawKeypad();
+  drawKeypad();
 
   // Setup Touch IRQ (Not working presently)
   //attachInterrupt(digitalPinToInterrupt(TOUCH_INT), TouchISR, FALLING);
@@ -68,15 +69,59 @@ void loop() {
   // put your main code here, to run repeatedly:
   //delay(1000);
   //Serial.println(pinState);
+
   
-  if(tft.getTouch(&t_x, &t_y)){
+  // get touch is rotated from what the library expects
+  if(tft.getTouch(&t_y, &t_x)){
+    int xIdx, yIdx;
+    
+    if(t_x >= 40){
+      xIdx = (t_x-40) / 80;  
+    } else {
+      xIdx = 0;
+    }
+    
+    if(t_y >= 64){
+      yIdx = (t_y - 64) / 96;
+    } else {
+      yIdx = -1;
+    }
+
+    Serial.print(xIdx);
+    Serial.print(" ");
+    Serial.print(yIdx);
+    Serial.print("; ");
     Serial.print(t_x);
-    Serial.print(", ");
+    Serial.print(" ");
     Serial.print(t_y);
     Serial.println();
+    
+    /*
+    if(x > 20 && x <60){
+      // 1 pressed
+    } else if ((x > 20 && x <60){
+      
+    } else if ((x > 20 && x <60){
+      
+    } else if ((x > 20 && x <60){
+      
+    } else if ((x > 20 && x <60){
+      
+    } else if ((x > 20 && x <60){
+      
+    } else if ((x > 20 && x <60){
+      
+    } else if ((x > 20 && x <60){
+      
+    } else if ((x > 20 && x <60){
+      
+    } else if ((x > 20 && x <60){
+    */
+  } else {
+    delay(30);
   }
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(100);
+  
+  
   /*
   while (lastPinState == pinState){
     pinState = digitalRead(D4); 
@@ -89,7 +134,26 @@ void loop() {
 }
 
 void drawKeypad() {
-  
+  tft.setTextDatum(MC_DATUM);
+  tft.setTextColor(TFT_WHITE);
+  //tft.setFreeFont(&FreeSans18pt7b);                 // Select the font
+  //tft.drawString("Sans 24", 160, 60, GFXFF);// Print the string name of the font
+  tft.setFreeFont(&FreeSans18pt7b);
+  //tft.drawString("1234567890", 160, 120, GFXFF);
+  tft.drawString("1", 40, 96);
+  tft.drawString("2", 120, 96);
+  tft.drawString("3", 200, 96);
+  tft.drawString("4", 40, 160);
+  tft.drawString("5", 120, 160);
+  tft.drawString("6", 200, 160);
+  tft.drawString("7", 40, 224);
+  tft.drawString("8", 120, 224);
+  tft.drawString("9", 200, 224);
+  tft.drawString("C", 40, 288); // get better icon for clear
+  tft.drawString("0", 120, 288);
+  tft.drawString("->", 200, 288); // get better icon for enter
+
+  tft.drawLine(0, 64, 240, 64, TFT_BLACK);
 }
 
 /*
@@ -103,6 +167,7 @@ void TouchISR(){
 //==================================================================
 
 #ifdef CAL_TS
+// TODO move this to from SD card to EEPROM
 void touch_calibrate()
 {
   uint16_t calData[5];
